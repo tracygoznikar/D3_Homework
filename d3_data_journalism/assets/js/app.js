@@ -3,6 +3,7 @@
 //from cheat sheet for event resize
 d3.select(window).on("resize", makeResponsive);
 makeResponsive();
+
 function makeResponsive(){
     var svgArea = d3.select("body").select("svg");
     //if svg exists remove and reload
@@ -22,7 +23,7 @@ function makeResponsive(){
     var width = svgWidth - margin.left - margin.right;
     var height = svgHeight - margin.top - margin.bottom;
 
-    // Create an SVG wrapper, append an SVG group that will hold our chart, and shift the latter by left and top margins.
+    // make svg wrapper and append svg group to hold chart
     var svg = d3.select("#scatter")
         .append("svg")
         .attr("width", svgWidth)
@@ -32,10 +33,10 @@ function makeResponsive(){
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
 
-//import data
-d3.csv("data.csv").then(function(data){
+    //import data
+    d3.csv("data.csv").then(function(data){
     //parse data
-    data.forEach(funciton(scatterdata){
+        data.forEach(function(scatterdata){
         scatterdata.age = +scatterdata.age;
         scatterdata.smokes = +scatterdata.smokes;
     });
@@ -90,5 +91,30 @@ d3.csv("data.csv").then(function(data){
         return(`${d.state}<br>Age (Median): ${d.age}<br>Smokes (%): ${d.smokes}`);
     });
     //tooltip in chart
-})
+    chartGroup.call(toolTip);
+
+    circlesGroup.on("mouseover", function(data){
+        toolTip.show(data, this)
+        .attr("fill", "pink");
+    })
+    //on event
+    .on("mouseout", function(data, index){
+        toolTip.hide(data);
+    });
+    //make labels for axis
+    chartGroup.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 0 - margin.left + 40)
+    .attr("x", 0 - (height / 2))
+    .attr("dy", "1em")
+    .attr("class", "axisText")
+    .text("Smokes (%)");
+
+    chartGroup.append("text")
+    .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
+    .attr("class", "axisText")
+    .text("Age (Median)");
+    }).catch(function (error){
+        console.log(error);
+    });
 }
